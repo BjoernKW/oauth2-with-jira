@@ -10,8 +10,6 @@ import org.springframework.security.oauth2.client.registration.InMemoryClientReg
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -20,9 +18,11 @@ import java.util.stream.Collectors;
 @Configuration
 public class ClientRegistrationConfig {
 
-    private final Environment environment;
-
     private static final String CLIENT_PROPERTY_KEY = "spring.security.oauth2.client.registration.";
+
+    private static final String JIRA_PROPERTY_KEY = "atlassian.jira.api.";
+
+    private final Environment environment;
 
     @Autowired
     public ClientRegistrationConfig(Environment environment) {
@@ -44,18 +44,14 @@ public class ClientRegistrationConfig {
 
     private ClientRegistration.Builder getJiraBuilder(String registrationId) {
         ClientRegistration.Builder builder = ClientRegistration.withRegistrationId(registrationId);
-        builder.clientAuthenticationMethod(ClientAuthenticationMethod.POST);
+
+        builder.clientName(environment.getProperty(CLIENT_PROPERTY_KEY + "jira.client-name"));
+        builder.clientAuthenticationMethod(ClientAuthenticationMethod.BASIC);
         builder.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
         builder.redirectUriTemplate("{baseUrl}/{action}/oauth/client/jira");
         builder.scope(Objects.requireNonNull(environment.getProperty(CLIENT_PROPERTY_KEY + "jira.scope")).split(" "));
-        builder.authorizationUri(
-                environment.getProperty(CLIENT_PROPERTY_KEY + "jira.authorization-uri")
-                        + "&client_id=" + environment.getProperty(CLIENT_PROPERTY_KEY + "jira.client-id")
-                        + "&scope=" + URLEncoder.encode(Objects.requireNonNull(environment.getProperty(CLIENT_PROPERTY_KEY + "jira.scope")), StandardCharsets.UTF_8)
-                        + "&redirect_uri=" + URLEncoder.encode(Objects.requireNonNull(environment.getProperty(CLIENT_PROPERTY_KEY + "jira.redirect-uri")), StandardCharsets.UTF_8)
-        );
+        builder.authorizationUri(environment.getProperty(CLIENT_PROPERTY_KEY + "jira.authorization-uri"));
         builder.tokenUri(environment.getProperty(CLIENT_PROPERTY_KEY + "jira.token-uri"));
-        builder.clientName(environment.getProperty(CLIENT_PROPERTY_KEY + "jira.client-name"));
 
         return builder;
     }

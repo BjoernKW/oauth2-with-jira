@@ -3,6 +3,8 @@ package com.bjoernkw.oauth2withjira.controllers;
 import java.util.Map;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -25,11 +27,15 @@ public class LoginController {
 
     private static final String CLIENT_PROPERTY_KEY = "spring.security.oauth2.client.registration.";
 
+    private static final String CLIENT_AUTHORIZATION_PATH= "/oauth2/authorization";
+
     private final Environment environment;
 
     private final ClientRegistrationRepository clientRegistrationRepository;
 
     private final OAuth2AuthorizedClientService authorizedClientService;
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public LoginController(
@@ -43,44 +49,27 @@ public class LoginController {
 
     @GetMapping("/")
     public String getLoginPage(Model model) {
-
         ClientRegistration clientRegistration = clientRegistrationRepository
                 .findByRegistrationId(
                         Objects
                                 .requireNonNull(environment.getProperty(CLIENT_PROPERTY_KEY + "jira.client-name"))
                                 .toLowerCase()
                 );
-        model.addAttribute("url", clientRegistration.getProviderDetails().getAuthorizationUri());
+
+        model.addAttribute("url", CLIENT_AUTHORIZATION_PATH + "/" + clientRegistration.getRegistrationId());
         model.addAttribute("name", clientRegistration.getClientName());
 
         return "index";
     }
 
     @GetMapping("/login-success")
-    public String getLoginInfo(Model model, OAuth2AuthenticationToken authentication) {
+    public String getLoginInfo(OAuth2AuthenticationToken authentication) {
         OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
                 authentication.getAuthorizedClientRegistrationId(),
                 authentication.getName()
         );
 
-        String userInfoEndpointUri = client
-                .getClientRegistration()
-                .getProviderDetails()
-                .getUserInfoEndpoint()
-                .getUri();
-
-        if (!StringUtils.isEmpty(userInfoEndpointUri)) {
-            RestTemplate restTemplate = new RestTemplate();
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + client.getAccessToken()
-                    .getTokenValue());
-
-            HttpEntity<String> entity = new HttpEntity<>("", headers);
-
-            ResponseEntity<Map> response = restTemplate.exchange(userInfoEndpointUri, HttpMethod.GET, entity, Map.class);
-            Map userAttributes = response.getBody();
-            model.addAttribute("name", Objects.requireNonNull(userAttributes).get("name"));
-        }
+        logger.info("Jira access token: {}", client.getAccessToken().getTokenValue());
 
         return "login-success";
     }
