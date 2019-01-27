@@ -15,8 +15,9 @@
 	<description>OAuth2 authentication with Jira</description>
 
 	<properties>
-		<java.version>11</java.version>
-		<spring-cloud.version>Greenwich.RELEASE</spring-cloud.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
 		<spring-security-oauth.version>2.1.2.RELEASE</spring-security-oauth.version>
 	</properties>
 
