@@ -20,8 +20,6 @@ public class ClientRegistrationConfig {
 
     private static final String CLIENT_PROPERTY_KEY = "spring.security.oauth2.client.registration.";
 
-    private static final String JIRA_PROPERTY_KEY = "atlassian.jira.api.";
-
     private final Environment environment;
 
     @Autowired
