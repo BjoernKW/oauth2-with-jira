@@ -1,4 +1,4 @@
-package com.bjoernkw.oauth2withjira;
+package com.bjoernkw.oauth2withjira.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,15 +18,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/oauth-login", "/login-failure", "/")
+                .antMatchers("/", "/login-failure")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
                 .oauth2Login()
-                .loginPage("/oauth-login")
+                .loginPage("/")
                 .authorizationEndpoint()
-                .baseUri("/oauth2/authorize-client")
+                .baseUri("/oauth/authorize-client")
                 .authorizationRequestRepository(authorizationRequestRepository())
                 .and()
                 .tokenEndpoint()

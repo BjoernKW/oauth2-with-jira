@@ -8,6 +8,15 @@ OAuth2 authentication with Jira
 * [Java 11](https://openjdk.java.net/projects/jdk/11/)
 * [Maven](https://maven.apache.org/)
 
+### Configuration
+
+Create an ```application-jira.properties``` file with these properties:
+
+```
+spring.security.oauth2.client.registration.jira.client-id= ...
+spring.security.oauth2.client.registration.jira.client-secret= ...
+```
+
 ### Running the app in dev mode
 
 Run ```mvn spring-boot:run``` from the command line.
